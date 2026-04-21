@@ -1,0 +1,48 @@
+﻿@model IEnumerable<PROG7311.Models.ServiceRequest>
+@{
+    ViewData["Title"] = "Service Requests";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2>Service Requests</h2>
+        <p>Manage service requests linked to contracts</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ New Request</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Contract</th>
+                <th>Client</th>
+                <th>Description</th>
+                <th>Cost (ZAR)</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td>@request.Contract.ServiceLevel</td>
+                    <td>@request.Contract.Client.Name</td>
+                    <td>@request.Description</td>
+                    <td>R @request.Cost.ToString("N2")</td>
+                    <td>
+                        <span class="badge @(request.Status == "Approved" ? "bg-success" : request.Status == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
+                            @request.Status
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@request.ServiceRequestId" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a asp-action="Edit" asp-route-id="@request.ServiceRequestId" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@request.ServiceRequestId" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,74 @@
+﻿@model IEnumerable<PROG7311.Models.Contract>
+@{
+    ViewData["Title"] = "Contracts";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2>Contracts</h2>
+        <p>Manage and filter contracts</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ New Contract</a>
+</div>
+
+<div class="card border-0 shadow-sm p-3 mb-4">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small text-muted">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="Draft" selected="@(ViewBag.StatusFilter == "Draft")">Draft</option>
+                <option value="Active" selected="@(ViewBag.StatusFilter == "Active")">Active</option>
+                <option value="Expired" selected="@(ViewBag.StatusFilter == "Expired")">Expired</option>
+                <option value="On Hold" selected="@(ViewBag.StatusFilter == "On Hold")">On Hold</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted">Start Date From</label>
+            <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted">End Date To</label>
+            <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate" />
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Client</th>
+                <th>Service Level</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contract in Model)
+            {
+                <tr>
+                    <td>@contract.Client.Name</td>
+                    <td>@contract.ServiceLevel</td>
+                    <td>@contract.StartDate.ToShortDateString()</td>
+                    <td>@contract.EndDate.ToShortDateString()</td>
+                    <td>
+                        <span class="badge @(contract.Status == "Active" ? "bg-success" : contract.Status == "Expired" ? "bg-danger" : contract.Status == "On Hold" ? "bg-warning text-dark" : "bg-secondary")">
+                            @contract.Status
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Details" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a asp-action="Edit" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@contract.ContractId" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

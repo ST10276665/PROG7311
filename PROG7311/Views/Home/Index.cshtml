@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-header">
+    <h2>Dashboard</h2>
+    <p>Global Logistics Management System overview</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="text-muted small">Total Clients</div>
+            <div class="fs-3 fw-semibold">@ViewBag.TotalClients</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="text-muted small">Total Contracts</div>
+            <div class="fs-3 fw-semibold">@ViewBag.TotalContracts</div>
+            <span class="badge bg-primary mt-1">@ViewBag.ActiveContracts Active</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-3">
+            <div class="text-muted small">Service Requests</div>
+            <div class="fs-3 fw-semibold">@ViewBag.TotalServiceRequests</div>
+            <span class="badge bg-warning text-dark mt-1">@ViewBag.PendingRequests Pending</span>
+        </div>
+    </div>
+</div>
+
+<h5 class="mb-3">Recent Contracts</h5>
+<div class="card border-0 shadow-sm">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Client</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contract in ViewBag.RecentContracts)
+            {
+                <tr>
+                    <td>@contract.Client.Name</td>
+                    <td>@contract.StartDate.ToShortDateString()</td>
+                    <td>@contract.EndDate.ToShortDateString()</td>
+                    <td>
+                        <span class="badge @(contract.Status == "Active" ? "bg-success" : contract.Status == "Expired" ? "bg-danger" : contract.Status == "On Hold" ? "bg-warning text-dark" : "bg-secondary")">
+                            @contract.Status
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

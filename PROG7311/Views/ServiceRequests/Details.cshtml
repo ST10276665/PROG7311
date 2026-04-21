@@ -1,0 +1,37 @@
+﻿@model PROG7311.Models.ServiceRequest
+@{
+    ViewData["Title"] = "Request Details";
+}
+
+<div class="page-header">
+    <h2>Service Request Details</h2>
+    <p>Full details of this service request</p>
+</div>
+
+<div class="card border-0 shadow-sm p-4" style="max-width: 700px;">
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Contract</dt>
+        <dd class="col-sm-9">@Model.Contract.ServiceLevel</dd>
+
+        <dt class="col-sm-3">Client</dt>
+        <dd class="col-sm-9">@Model.Contract.Client.Name</dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@Model.Description</dd>
+
+        <dt class="col-sm-3">Cost</dt>
+        <dd class="col-sm-9">R @Model.Cost.ToString("N2")</dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">
+            <span class="badge @(Model.Status == "Approved" ? "bg-success" : Model.Status == "Rejected" ? "bg-danger" : "bg-warning text-dark")">
+                @Model.Status
+            </span>
+        </dd>
+    </dl>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.ServiceRequestId" class="btn btn-outline-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+</div>

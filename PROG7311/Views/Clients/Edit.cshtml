@@ -1,0 +1,43 @@
+﻿@model PROG7311.Models.Client
+@{
+    ViewData["Title"] = "Edit Client";
+}
+
+<div class="page-header">
+    <h2>Edit Client</h2>
+    <p>Update client information</p>
+</div>
+
+<div class="card border-0 shadow-sm p-4" style="max-width: 600px;">
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="ClientId" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ContactDetails" class="form-label"></label>
+            <input asp-for="ContactDetails" class="form-control" />
+            <span asp-validation-for="ContactDetails" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Region" class="form-label"></label>
+            <input asp-for="Region" class="form-control" />
+            <span asp-validation-for="Region" class="text-danger small"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
