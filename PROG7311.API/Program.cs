@@ -87,3 +87,9 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// Expose the implicit Program class to integration tests
+namespace PROG7311.API
+{
+    public partial class Program { }
+}
