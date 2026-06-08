@@ -34,6 +34,8 @@ namespace PROG7311.Services
         {
             SetAuthHeader();
             var resp = await _http.GetAsync(endpoint);
+            if (resp.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                throw new UnauthorizedAccessException("Session expired. Please log in again.");
             if (!resp.IsSuccessStatusCode)
             {
                 var body = await resp.Content.ReadAsStringAsync();

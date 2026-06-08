@@ -65,4 +65,25 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Ensure database migrations are applied on startup (useful for Docker deployments)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PROG7311.API.Data.ApplicationDbContext>();
+    var retries = 10;
+    while (retries > 0)
+    {
+        try
+        {
+            db.Database.Migrate();
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            Console.WriteLine($"DB not ready, retries left: {retries}. Error: {ex.Message}");
+            await Task.Delay(3000);
+        }
+    }
+}
+
 app.Run();

@@ -40,6 +40,7 @@ namespace PROG7311.API.Controllers
 
         // POST /api/contracts
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] Contract contract)
         {
             var created = await _repository.CreateAsync(contract);

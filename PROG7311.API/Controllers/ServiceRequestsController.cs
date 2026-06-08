@@ -38,6 +38,7 @@ namespace PROG7311.API.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] ServiceRequest request)
         {
             var (success, error, created) = await _service.CreateAsync(request);

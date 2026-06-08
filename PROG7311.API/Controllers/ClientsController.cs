@@ -37,6 +37,7 @@ namespace PROG7311.API.Controllers
 
         // POST /api/clients
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] Client client)
         {
             var created = await _repository.CreateAsync(client);

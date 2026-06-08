@@ -62,7 +62,15 @@ app.UseHttpsRedirection();
                 return;
             }
         }
-        await next();
+        try
+        {
+            await next();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ctx.Session.Remove("JwtToken");
+            ctx.Response.Redirect("/Auth/Login");
+        }
     });
     app.UseAuthorization();
 
