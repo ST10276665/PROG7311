@@ -21,6 +21,6 @@ namespace PROG7311.API.Models
         [Required]
         public string Status { get; set; } = "Pending";
 
-        public Contract Contract { get; set; } = null!;
+        public Contract? Contract { get; set; }
     }
 }

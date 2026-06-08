@@ -8,6 +8,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
+builder.Services.AddHealthChecks();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -63,6 +64,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 // Ensure database migrations are applied on startup (useful for Docker deployments)

@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var cultureInfo = new System.Globalization.CultureInfo("en-ZA");
 cultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+cultureInfo.DateTimeFormat.ShortDatePattern = "yyyy-MM-dd";
 System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
@@ -25,7 +26,13 @@ System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
     builder.Services.AddControllers();
 
     // API integration: session, http client, and context accessor
-    builder.Services.AddSession();
+    builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddSession(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.IdleTimeout = TimeSpan.FromHours(8);
+    });
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHttpClient<PROG7311.Services.ApiService>(client =>
     {

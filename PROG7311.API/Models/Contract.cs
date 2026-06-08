@@ -18,7 +18,7 @@ namespace PROG7311.API.Models
         [Required]
         public string Status { get; set; } = "Draft";
 
-        public Client Client { get; set; } = null!;
+        public Client? Client { get; set; }
         public string ServiceLevel { get; set; } = string.Empty;
         public string? SignedAgreementPath { get; set; }
         public ICollection<ServiceRequest> ServiceRequests { get; set; } = new List<ServiceRequest>();

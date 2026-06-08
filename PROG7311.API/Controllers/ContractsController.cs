@@ -20,6 +20,7 @@ namespace PROG7311.API.Controllers
 
         // GET /api/contracts?status=Active&startDate=2025-01-01
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll(
             [FromQuery] string? status,
             [FromQuery] DateTime? startDate,
@@ -31,6 +32,7 @@ namespace PROG7311.API.Controllers
 
         // GET /api/contracts/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var contract = await _repository.GetByIdAsync(id);
@@ -43,6 +45,8 @@ namespace PROG7311.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] Contract contract)
         {
+            // Avoid including the Client navigation property which can cause model validation/EF issues
+            contract.Client = null;
             var created = await _repository.CreateAsync(contract);
             return CreatedAtAction(nameof(GetById), new { id = created.ContractId }, created);
         }

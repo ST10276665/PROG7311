@@ -40,7 +40,16 @@ namespace PROG7311.API.Repositories
         public async Task<Contract> CreateAsync(Contract contract)
         {
             _context.Contracts.Add(contract);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ContractRepository.CreateAsync] Error saving contract: {ex}");
+                throw;
+            }
+
             return contract;
         }
 

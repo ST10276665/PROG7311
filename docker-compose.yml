@@ -29,6 +29,12 @@ services:
       - sql-server-db
     networks:
       - glms-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   glms-frontend-web:
     build:
@@ -42,7 +48,8 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - ApiSettings__BaseUrl=http://glms-backend-api:8080
     depends_on:
-      - glms-backend-api
+      glms-backend-api:
+        condition: service_healthy
     networks:
       - glms-network
 

@@ -23,6 +23,7 @@ namespace PROG7311.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var all = await _repo.GetAllAsync();
@@ -30,6 +31,7 @@ namespace PROG7311.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var item = await _repo.GetByIdAsync(id);
@@ -41,6 +43,8 @@ namespace PROG7311.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] ServiceRequest request)
         {
+            // Avoid including the Contract navigation property to prevent model validation/EF issues
+            request.Contract = null;
             var (success, error, created) = await _service.CreateAsync(request);
             if (!success) return BadRequest(new { error });
 

@@ -20,6 +20,7 @@ namespace PROG7311.API.Controllers
 
         // GET /api/clients
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var clients = await _repository.GetAllAsync();
@@ -28,6 +29,7 @@ namespace PROG7311.API.Controllers
 
         // GET /api/clients/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var client = await _repository.GetByIdAsync(id);

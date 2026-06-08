@@ -56,6 +56,10 @@ namespace PROG7311.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Contract contract, IFormFile? signedAgreement)
         {
+            // Remove navigation properties from validation so the form can validate only scalar fields
+            ModelState.Remove("Client");
+            ModelState.Remove("ServiceRequests");
+
             if (signedAgreement != null)
             {
                 try
@@ -67,10 +71,6 @@ namespace PROG7311.Controllers
                     ModelState.AddModelError("SignedAgreement", ex.Message);
                 }
             }
-
-            // Remove navigation properties from validation
-            ModelState.Remove("Client");
-            ModelState.Remove("ServiceRequests");
 
             if (ModelState.IsValid)
             {
