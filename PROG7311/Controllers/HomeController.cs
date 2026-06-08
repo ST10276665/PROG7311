@@ -1,30 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PROG7311.Data;
+using PROG7311.Models;
+using PROG7311.Services;
+using System.Linq;
 
 namespace PROG7311.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApiService _apiService;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(ApiService apiService)
         {
-            _context = context;
+            _apiService = apiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.TotalClients = await _context.Clients.CountAsync();
-            ViewBag.TotalContracts = await _context.Contracts.CountAsync();
-            ViewBag.TotalServiceRequests = await _context.ServiceRequests.CountAsync();
-            ViewBag.ActiveContracts = await _context.Contracts.CountAsync(c => c.Status == "Active");
-            ViewBag.PendingRequests = await _context.ServiceRequests.CountAsync(r => r.Status == "Pending");
-            ViewBag.RecentContracts = await _context.Contracts
-                .Include(c => c.Client)
-                .OrderByDescending(c => c.ContractId)
-                .Take(5)
-                .ToListAsync();
+            var clients = await _apiService.GetAsync<System.Collections.Generic.List<Client>>("/api/clients");
+            var contracts = await _apiService.GetAsync<System.Collections.Generic.List<Contract>>("/api/contracts");
+            var requests = await _apiService.GetAsync<System.Collections.Generic.List<ServiceRequest>>("/api/servicerequests");
+
+            var allClients = clients ?? new System.Collections.Generic.List<Client>();
+            var allContracts = contracts ?? new System.Collections.Generic.List<Contract>();
+            var allRequests = requests ?? new System.Collections.Generic.List<ServiceRequest>();
+
+            ViewBag.TotalClients = allClients.Count;
+            ViewBag.TotalContracts = allContracts.Count;
+            ViewBag.TotalServiceRequests = allRequests.Count;
+            ViewBag.ActiveContracts = allContracts.Count(c => c.Status == "Active");
+            ViewBag.PendingRequests = allRequests.Count(r => r.Status == "Pending");
+            ViewBag.RecentContracts = allContracts.OrderByDescending(c => c.ContractId).Take(5).ToList();
             return View();
         }
     }

@@ -40,6 +40,9 @@
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ServiceRequests" ? "active" : "")" asp-controller="ServiceRequests" asp-action="Index">
                 &#9632; Service Requests
             </a>
+            <a class="nav-link" asp-controller="Auth" asp-action="Logout">
+                &#9632; Logout
+            </a>
         </nav>
     </div>
     <div class="main-content">

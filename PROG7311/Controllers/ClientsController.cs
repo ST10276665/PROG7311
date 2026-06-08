@@ -1,30 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PROG7311.Data;
 using PROG7311.Models;
+using PROG7311.Services;
 
 namespace PROG7311.Controllers
 {
     public class ClientsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApiService _apiService;
 
-        public ClientsController(ApplicationDbContext context)
+        public ClientsController(ApiService apiService)
         {
-            _context = context;
+            _apiService = apiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var clients = await _context.Clients.ToListAsync();
-            return View(clients);
+            var clients = await _apiService.GetAsync<System.Collections.Generic.List<Client>>("/api/clients");
+            return View(clients ?? new System.Collections.Generic.List<Client>());
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var client = await _context.Clients
-                .Include(c => c.Contracts)
-                .FirstOrDefaultAsync(c => c.ClientId == id);
+            var client = await _apiService.GetAsync<Client>($"/api/clients/{id}");
 
             if (client == null) return NotFound();
             return View(client);
@@ -41,8 +38,7 @@ namespace PROG7311.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Clients.Add(client);
-                await _context.SaveChangesAsync();
+                await _apiService.PostAsync<Client>("/api/clients", client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -50,7 +46,7 @@ namespace PROG7311.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            var client = await _apiService.GetAsync<Client>($"/api/clients/{id}");
             if (client == null) return NotFound();
             return View(client);
         }
@@ -63,8 +59,7 @@ namespace PROG7311.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(client);
-                await _context.SaveChangesAsync();
+                await _apiService.PutAsync($"/api/clients/{id}", client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -72,7 +67,7 @@ namespace PROG7311.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var client = await _context.Clients.FirstOrDefaultAsync(c => c.ClientId == id);
+            var client = await _apiService.GetAsync<Client>($"/api/clients/{id}");
             if (client == null) return NotFound();
             return View(client);
         }
@@ -81,12 +76,7 @@ namespace PROG7311.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
-            if (client != null)
-            {
-                _context.Clients.Remove(client);
-                await _context.SaveChangesAsync();
-            }
+            await _apiService.DeleteAsync($"/api/clients/{id}");
             return RedirectToAction(nameof(Index));
         }
     }

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using PROG7311.Data;
 using PROG7311.Models;
 using PROG7311.Services;
 
@@ -9,49 +7,48 @@ namespace PROG7311.Controllers
 {
     public class ContractsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApiService _apiService;
         private readonly FileService _fileService;
 
-        public ContractsController(ApplicationDbContext context, FileService fileService)
+        public ContractsController(ApiService apiService, FileService fileService)
         {
-            _context = context;
+            _apiService = apiService;
             _fileService = fileService;
         }
 
         public async Task<IActionResult> Index(string? status, DateTime? startDate, DateTime? endDate)
         {
-            var contracts = _context.Contracts.Include(c => c.Client).AsQueryable();
+            var contracts = await _apiService.GetAsync<System.Collections.Generic.List<Contract>>("/api/contracts");
 
+            var filtered = contracts ?? new System.Collections.Generic.List<Contract>();
             if (!string.IsNullOrEmpty(status))
-                contracts = contracts.Where(c => c.Status == status);
+                filtered = filtered.FindAll(c => c.Status == status);
 
             if (startDate.HasValue)
-                contracts = contracts.Where(c => c.StartDate >= startDate.Value);
+                filtered = filtered.FindAll(c => c.StartDate >= startDate.Value);
 
             if (endDate.HasValue)
-                contracts = contracts.Where(c => c.EndDate <= endDate.Value);
+                filtered = filtered.FindAll(c => c.EndDate <= endDate.Value);
 
             ViewBag.StatusFilter = status;
             ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
             ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
 
-            return View(await contracts.ToListAsync());
+            return View(filtered);
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var contract = await _context.Contracts
-                .Include(c => c.Client)
-                .Include(c => c.ServiceRequests)
-                .FirstOrDefaultAsync(c => c.ContractId == id);
+            var contract = await _apiService.GetAsync<Contract>($"/api/contracts/{id}");
 
             if (contract == null) return NotFound();
             return View(contract);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.Clients = new SelectList(_context.Clients, "ClientId", "Name");
+            var clients = await _apiService.GetAsync<System.Collections.Generic.List<Client>>("/api/clients");
+            ViewBag.Clients = new SelectList(clients ?? new System.Collections.Generic.List<Client>(), "ClientId", "Name");
             return View();
         }
 
@@ -77,8 +74,7 @@ namespace PROG7311.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Contracts.Add(contract);
-                await _context.SaveChangesAsync();
+                await _apiService.PostAsync<Contract>("/api/contracts", contract);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -92,15 +88,17 @@ namespace PROG7311.Controllers
                 }
             }
 
-            ViewBag.Clients = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
+            var clients = await _apiService.GetAsync<System.Collections.Generic.List<Client>>("/api/clients");
+            ViewBag.Clients = new SelectList(clients ?? new System.Collections.Generic.List<Client>(), "ClientId", "Name", contract.ClientId);
             return View(contract);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
+            var contract = await _apiService.GetAsync<Contract>($"/api/contracts/{id}");
             if (contract == null) return NotFound();
-            ViewBag.Clients = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
+            var clients = await _apiService.GetAsync<System.Collections.Generic.List<Client>>("/api/clients");
+            ViewBag.Clients = new SelectList(clients ?? new System.Collections.Generic.List<Client>(), "ClientId", "Name", contract.ClientId);
             return View(contract);
         }
 
@@ -128,21 +126,18 @@ namespace PROG7311.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(contract);
-                await _context.SaveChangesAsync();
+                await _apiService.PutAsync($"/api/contracts/{id}", contract);
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Clients = new SelectList(_context.Clients, "ClientId", "Name", contract.ClientId);
+            var clients = await _apiService.GetAsync<System.Collections.Generic.List<Client>>("/api/clients");
+            ViewBag.Clients = new SelectList(clients ?? new System.Collections.Generic.List<Client>(), "ClientId", "Name", contract.ClientId);
             return View(contract);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var contract = await _context.Contracts
-                .Include(c => c.Client)
-                .FirstOrDefaultAsync(c => c.ContractId == id);
-
+            var contract = await _apiService.GetAsync<Contract>($"/api/contracts/{id}");
             if (contract == null) return NotFound();
             return View(contract);
         }
@@ -151,12 +146,7 @@ namespace PROG7311.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contract = await _context.Contracts.FindAsync(id);
-            if (contract != null)
-            {
-                _context.Contracts.Remove(contract);
-                await _context.SaveChangesAsync();
-            }
+            await _apiService.DeleteAsync($"/api/contracts/{id}");
             return RedirectToAction(nameof(Index));
         }
     }

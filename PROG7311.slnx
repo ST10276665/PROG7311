@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="PROG7311.API/PROG7311.API.csproj" Id="5ca43176-5bf1-4217-95fc-4a99bcfd4a03" />
   <Project Path="PROG7311.Tests/PROG7311.Tests.csproj" Id="4cfc90e6-b0f3-4174-a1fd-57f961cfc035" />
   <Project Path="PROG7311/PROG7311.csproj" />
 </Solution>

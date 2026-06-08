@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using PROG7311.Data;
 using PROG7311.Models;
+using PROG7311.Services;
 using PROG7311.Patterns.Observers;
 using PROG7311.Patterns.Strategies;
 
@@ -10,18 +9,18 @@ namespace PROG7311.Controllers
 {
     public class ServiceRequestsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApiService _apiService;
         private readonly ServiceRequestValidator _validator;
         private readonly ContractNotifier _notifier;
         private readonly ManagerNotifier _managerNotifier;
 
         public ServiceRequestsController(
-            ApplicationDbContext context,
+            ApiService apiService,
             ServiceRequestValidator validator,
             ContractNotifier notifier,
             ManagerNotifier managerNotifier)
         {
-            _context = context;
+            _apiService = apiService;
             _validator = validator;
             _notifier = notifier;
             _managerNotifier = managerNotifier;
@@ -30,30 +29,29 @@ namespace PROG7311.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var requests = await _context.ServiceRequests
-                .Include(s => s.Contract)
-                .ThenInclude(c => c.Client)
-                .ToListAsync();
-            return View(requests);
+            var requests = await _apiService.GetAsync<System.Collections.Generic.List<ServiceRequest>>("/api/servicerequests");
+            return View(requests ?? new System.Collections.Generic.List<ServiceRequest>());
         }
 
         public async Task<IActionResult> Details(int id)
         {
-            var request = await _context.ServiceRequests
-                .Include(s => s.Contract)
-                .ThenInclude(c => c.Client)
-                .FirstOrDefaultAsync(s => s.ServiceRequestId == id);
+            var request = await _apiService.GetAsync<ServiceRequest>($"/api/servicerequests/{id}");
 
             if (request == null) return NotFound();
             return View(request);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.Contracts = new SelectList(
-                _context.Contracts.Include(c => c.Client),
-                "ContractId",
-                "ServiceLevel");
+            var contractsRaw = await _apiService.GetAsync<System.Collections.Generic.List<Contract>>("/api/contracts");
+            var contracts = (contractsRaw ?? new System.Collections.Generic.List<Contract>())
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ContractId.ToString(),
+                    Text = $"{c.Client.Name} — {c.ServiceLevel} ({c.Status})"
+                });
+
+            ViewBag.Contracts = new SelectList(contracts, "Value", "Text");
             return View();
         }
 
@@ -63,7 +61,7 @@ namespace PROG7311.Controllers
         {
             ModelState.Remove("Contract");
 
-            var contract = await _context.Contracts.FindAsync(request.ContractId);
+            var contract = await _apiService.GetAsync<Contract>($"/api/contracts/{request.ContractId}");
 
             if (contract == null)
             {
@@ -80,29 +78,38 @@ namespace PROG7311.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.ServiceRequests.Add(request);
-                await _context.SaveChangesAsync();
+                await _apiService.PostAsync<ServiceRequest>("/api/servicerequests", request);
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Contracts = new SelectList(
-                _context.Contracts.Include(c => c.Client),
-                "ContractId",
-                "ServiceLevel",
-                request.ContractId);
+            var contractsRaw = await _apiService.GetAsync<System.Collections.Generic.List<Contract>>("/api/contracts");
+            var contracts = (contractsRaw ?? new System.Collections.Generic.List<Contract>())
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ContractId.ToString(),
+                    Text = $"{c.Client.Name} — {c.ServiceLevel} ({c.Status})",
+                    Selected = c.ContractId == request.ContractId
+                });
+
+            ViewBag.Contracts = new SelectList(contracts, "Value", "Text");
             return View(request);
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var request = await _context.ServiceRequests.FindAsync(id);
+            var request = await _apiService.GetAsync<ServiceRequest>($"/api/servicerequests/{id}");
             if (request == null) return NotFound();
 
-            ViewBag.Contracts = new SelectList(
-                _context.Contracts.Include(c => c.Client),
-                "ContractId",
-                "ServiceLevel",
-                request.ContractId);
+            var contractsRaw = await _apiService.GetAsync<System.Collections.Generic.List<Contract>>("/api/contracts");
+            var contracts = (contractsRaw ?? new System.Collections.Generic.List<Contract>())
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ContractId.ToString(),
+                    Text = $"{c.Client.Name} — {c.ServiceLevel} ({c.Status})",
+                    Selected = c.ContractId == request.ContractId
+                });
+
+            ViewBag.Contracts = new SelectList(contracts, "Value", "Text");
             return View(request);
         }
 
@@ -114,7 +121,7 @@ namespace PROG7311.Controllers
 
             ModelState.Remove("Contract");
 
-            var contract = await _context.Contracts.FindAsync(request.ContractId);
+            var contract = await _apiService.GetAsync<Contract>($"/api/contracts/{request.ContractId}");
 
             if (contract == null)
             {
@@ -131,26 +138,31 @@ namespace PROG7311.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(request);
-                await _context.SaveChangesAsync();
+                await _apiService.PutAsync($"/api/servicerequests/{id}", request);
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.Contracts = new SelectList(
-                _context.Contracts.Include(c => c.Client),
-                "ContractId",
-                "ServiceLevel",
-                request.ContractId);
+            var contractsRaw = await _apiService.GetAsync<System.Collections.Generic.List<Contract>>("/api/contracts");
+            var contracts = (contractsRaw ?? new System.Collections.Generic.List<Contract>())
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ContractId.ToString(),
+                    Text = $"{c.Client.Name} — {c.ServiceLevel} ({c.Status})",
+                    Selected = c.ContractId == request.ContractId
+                });
+
+            ViewBag.Contracts = new SelectList(contracts, "Value", "Text");
             return View(request);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var request = await _context.ServiceRequests
-                .Include(s => s.Contract)
-                .FirstOrDefaultAsync(s => s.ServiceRequestId == id);
+            var request = await _apiService.GetAsync<ServiceRequest>($"/api/servicerequests/{id}");
+            if (request == null)
+            {
+                return NotFound();
+            }
 
-            if (request == null) return NotFound();
             return View(request);
         }
 
@@ -158,12 +170,7 @@ namespace PROG7311.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var request = await _context.ServiceRequests.FindAsync(id);
-            if (request != null)
-            {
-                _context.ServiceRequests.Remove(request);
-                await _context.SaveChangesAsync();
-            }
+            await _apiService.DeleteAsync($"/api/servicerequests/{id}");
             return RedirectToAction(nameof(Index));
         }
     }
